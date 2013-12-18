@@ -1,0 +1,30 @@
+﻿<!doctype html>
+<html ng-app="todo">
+  <head>
+    <script src="lib/angular.min.js"></script>
+    <script src="lib/angular-cookies.min.js"></script>
+    <script src="js/todo.js"></script>
+    <link rel="stylesheet" href="css/todo.css">
+  </head>
+  <body>
+    <div class="well">
+      <h2>Todo</h2>
+      <div ng-controller="TodoCtrl">
+        <span><b>Date</b> {{today}}</span>
+        [ <a href="" ng-click="archive()">archive</a> ]
+        <ul class="unstyled">
+          <li ng-repeat="todo in todos">
+            <input type="checkbox" ng-model="todo.done" ng-change="saveCookie()">
+            <span class="done-{{todo.done}}">{{todo.summary}}</span>
+          </li>
+        </ul>
+        <form ng-submit="addTodo()">
+          <input type="text" ng-model="todoSummary" size="30"
+               placeholder="add new todo here">
+          <input class="btn-primary" type="submit" value="add">
+        </form>    
+      </div>
+    </div>
+  </body>
+</html>
+
