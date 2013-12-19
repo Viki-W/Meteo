@@ -2,7 +2,6 @@
 <html ng-app="todo">
   <head>
     <script src="lib/angular.min.js"></script>
-    <script src="lib/angular-cookies.min.js"></script>
     <script src="js/todo.js"></script>
     <link rel="stylesheet" href="css/todo.css">
   </head>
@@ -13,8 +12,8 @@
         <span><b>Date</b> {{today}}</span>
         [ <a href="" ng-click="archive()">archive</a> ]
         <ul class="unstyled">
-          <li ng-repeat="todo in todos">
-            <input type="checkbox" ng-model="todo.done" ng-change="saveCookie()">
+          <li ng-repeat="todo in todos track by $index">
+            <input type="checkbox" ng-model="todo.done" ng-change="saveData()">
             <span class="done-{{todo.done}}">{{todo.summary}}</span>
           </li>
         </ul>
@@ -27,4 +26,3 @@
     </div>
   </body>
 </html>
-
