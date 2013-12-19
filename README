@@ -1,2 +1,5 @@
 Meteo 
-A pilot project to build visually-rich interactive timelines
+1. Install NodeJs
+2. Install Express: npm install express
+3. Start the server: node app.js
+4. http://localhost:8080/todo

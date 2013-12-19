@@ -18,7 +18,8 @@ app.get('/todo/api',function(req, res){
 	var filepath = __dirname + '/data.json';
 	fs.readFile(filepath, 'utf-8',function (err, data) {
 			if (err) {
-				res.send(500);
+				res.send(404);
+				return;
 			}
 			res.send(data);
 	});    
@@ -34,6 +35,7 @@ app.post('/todo/api',function(req, res){
 		fs.writeFile(filepath,body,function(err){
 			if (err) {
 				res.send(500);
+				return;
 			}
 		});
 		res.send(body);
