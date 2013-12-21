@@ -3,7 +3,7 @@
   <head>
     <meta charset=UTF-8 " />
 	<title>Todo</Title>
-    <script src="lib/angular.min.js"></script>
+    <script src="js/angular.min.js"></script>
     <script src="js/todo.js"></script>
     <link rel="stylesheet" href="css/todo.css">
   </head>
@@ -15,7 +15,7 @@
         [ <a href="" ng-click="archive()">archive</a> ]
         <ul class="unstyled">
           <li ng-repeat="todo in todos track by $index">
-            <input type="checkbox" ng-model="todo.done" ng-change="saveData()">
+            <input type="checkbox" ng-model="todo.done" ng-change="update(todo._id, todo.done)">
             <span class="done-{{todo.done}}">{{todo.summary}}</span>
           </li>
         </ul>
