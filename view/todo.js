@@ -1,69 +1,103 @@
 ﻿var app = angular.module('todo', []);
-app.controller('TodoCtrl', ['$scope', '$http', '$filter',
-    function TodoCtrl($scope, $http, $filter) {
-        $scope.today = $filter('date')(new Date(), 'MM/dd/yyyy');
+
+app.factory('todoFactory', ['$http', function ($http) {
 		
-        $http.get('/todo/api').
-            success(function (data) {
+		var urlBase = '/todo/api';		
+		var todoFactory = {};
+		
+		todoFactory.getTodos = function () {
+			return 	$http.get(urlBase);		
+		};
+
+		todoFactory.insertTodo = function (todo) {
+			return $http.post(urlBase, todo);
+		};
+		
+		todoFactory.updateTodo = function (id, update) {
+			return $http.put(urlBase + '/' + id, update);
+		};
+	
+		todoFactory.deleteTodos = function () {
+			return $http.delete(urlBase);
+		};
+		
+		return todoFactory;
+}]);
+
+app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
+    function TodoCtrl($scope, $filter, todoFactory) {
+        $scope.today = $filter('date')(new Date(), 'MM/dd/yyyy');
+	
+		getTodos();
+		
+		function getTodos() {
+			todoFactory.getTodos()
+            .success(function (data) {
                 $scope.todos = data;
-        });
+            })
+            .error(function (err) {
+                $scope.todos = [];
+				console.log ("Unable to get todos" + err);
+            });
+		};
         
 		$scope.addTodo = function () {
             if($scope.newTodo) {
                 var newTodo = {
                     'title': $scope.newTodo,
-                    'done': false 
+                    'done': false
                 };
-                $http.post('/todo/api', newTodo).
-                success(function(data){
+                todoFactory.insertTodo(newTodo).
+				success(function(data){
                     $scope.todos = data;
                     $scope.newTodo = '';
                 }).
-                error(function(data){
-                    console.log('Failed to add: ' + data);
+                error(function(err){
+                    console.log('Failed to add: ' + err);
                 });
             }
         };
 
-        $scope.updateTodo = function (id, key, value) {
-            $http.put('/todo/api/' + id + "?" + key + "=" + value).
-                success(function(data){
-                    $scope.todos = data;
-                }).
-                error(function(data){
-                    console.log('Failed to update: ' + data);
+		$scope.archive = function () {
+            todoFactory.deleteTodos().
+            success(function(data){
+                $scope.todos = data;
+             }).
+            error(function(err){
+                console.log('Failed to archive: ' + err);
             });
-        };
-
-        $scope.archive = function () {
-            $http.delete('/todo/api').
-                success(function(data){
-                    $scope.todos = data;
-                }).
-                error(function(data){
-                    console.log('Failed to archive: ' + data);
-            });
-        };		
-		
-		$scope.done = function (todo) {
-            $scope.updateTodo(todo._id, 'done', todo.done);
         };	
 		
+		$scope.done = function (todo) {
+			todoFactory.updateTodo(todo._id, { done : todo.done }).
+				success(function(data){
+					$scope.todos = data;
+				}).
+                error(function(err){
+                    console.log('Failed to complete: ' + err);
+				});
+        };	
+				
 		$scope.editTitle = function (todo) {
-			$scope.originalTitle = todo.title;
+			$scope.originalTodo = angular.extend({}, todo);;
             todo.editing = true;			
         };
 		
-		$scope.saveTitle = function (todo) {	            
-			$scope.updateTodo(todo._id, 'title', todo.title);
-			delete todo.editing;
+		$scope.saveTitle = function (todo) {
+			todoFactory.updateTodo(todo._id, { title : todo.title}).
+				success(function(data){
+					delete todo.editing;
+					$scope.todos = data;
+                }).
+                error(function(err){
+                    console.log('Failed to update the title: ' + err);
+            });
         };
 		
 		$scope.cancel = function (todo) {		
-			todo.title = $scope.originalTitle;
 			delete todo.editing;
+			$scope.todos[$scope.todos.indexOf(todo)] = $scope.originalTodo;
         };
-
 }]);
 
 app.directive('onEsc', function() {
@@ -103,6 +137,18 @@ app.directive('onFocus', function($timeout, $parse) {
 			scope.$apply(model.assign(scope,false));
 		});		
 	}
+  };
+});
+
+app.filter('notArchived', function() {
+   return function(items, archived) {
+    var filtered = [];
+    angular.forEach(items, function(item) {
+      if(archived === undefined || archived === false){
+        filtered.push(item);
+      }
+    });
+    return filtered;
   };
 });
 

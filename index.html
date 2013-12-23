@@ -17,7 +17,7 @@
           <li ng-repeat="todo in todos track by $index">
             <input type="checkbox" ng-model="todo.done" ng-change="done(todo)">
             <label class="done-{{todo.done}}" ng-hide="todo.editing" ng-dblclick="editTitle(todo)">{{todo.title}}</label>
-			<input type="text" ng-model="todo.title" ng-show="todo.editing" on-enter="saveTitle(todo)" on-esc="cancel(todo)" on-focus="todo.editing" >
+			<input type="text" ng-model="todo.title" ng-show="todo.editing" on-enter="saveTitle(todo)" on-esc="cancel(todo)" on-focus="todo.editing">
           </li>
         </ul>
         <form ng-submit="addTodo()">
