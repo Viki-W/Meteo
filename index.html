@@ -2,7 +2,7 @@
 <html ng-app="todo">
   <head>
     <meta charset=UTF-8 " />
-	<title>Todo</Title>
+	<title>Todo</title>
     <script src="js/angular.min.js"></script>
     <script src="js/todo.js"></script>
     <link rel="stylesheet" href="css/todo.css">
@@ -11,17 +11,17 @@
     <div class="well">
       <h2>Todo</h2>
       <div ng-controller="TodoCtrl">
-        <span><b>Date</b> {{today}}</span>
+        <label><b>Date</b> {{today}}</label>
         [ <a href="" ng-click="archive()">archive</a> ]
         <ul class="unstyled">
           <li ng-repeat="todo in todos track by $index">
-            <input type="checkbox" ng-model="todo.done" ng-change="update(todo._id, todo.done)">
-            <span class="done-{{todo.done}}">{{todo.summary}}</span>
+            <input type="checkbox" ng-model="todo.done" ng-change="done(todo)">
+            <label class="done-{{todo.done}}" ng-hide="todo.editing" ng-dblclick="editTitle(todo)">{{todo.title}}</label>
+			<input type="text" ng-model="todo.title" ng-show="todo.editing" on-enter="saveTitle(todo)" on-esc="cancel(todo)" on-focus="todo.editing" >
           </li>
         </ul>
         <form ng-submit="addTodo()">
-          <input type="text" ng-model="todoSummary" size="30"
-               placeholder="add new todo here">
+          <input type="text" ng-model="newTodo" size="30" placeholder="add new todo here">
           <input class="btn-primary" type="submit" value="add">
         </form>    
       </div>

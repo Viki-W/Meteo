@@ -4,7 +4,7 @@
     port = process.env.PORT || 8080,
     Todo = require('./model/todo');
 
-mongoose.connect('mongodb://localhost:27017/todo');
+mongoose.connect('mongodb://9.123.154.43:27017/todo');
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
@@ -52,7 +52,15 @@ app.post('/todo/api',function(req, res){
 
 app.put('/todo/api/:todo_id?',function(req, res){
     var query = { _id : req.params.todo_id }; 
-    Todo.update(query,{ done: req.query.done }, function (err, todo) {
+	var updateData = {};
+	for (var field in Todo.schema.paths) {
+           if ((field !== '_id') && (field !== '__v')) {
+              if (req.query[field] !== undefined) {
+					updateData[field] = req.query[field];
+              }
+           }  
+        }  
+    Todo.update(query, updateData, function (err, todo) {
         if (err){
             res.send(err);
         }

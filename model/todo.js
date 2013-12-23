@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 var todoSchema = mongoose.Schema({
-    summary: String,
+    title: String,
 	done: Boolean,
 	archived: Boolean
 })
