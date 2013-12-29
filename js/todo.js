@@ -1,4 +1,4 @@
-﻿var app = angular.module('todo', ['ngRoute']);
+﻿var app = angular.module('todo', ['ngRoute','ngResource']);
 
 app.config(function($routeProvider){
 	$routeProvider.
@@ -15,46 +15,18 @@ app.config(function($routeProvider){
     });
 });
 
-app.factory('todoFactory', ['$http', function ($http) {		
-		var urlBase = '/todo/api';		
-		var todoFactory = {};
-		
-		todoFactory.getTodos = function () {
-			return 	$http.get(urlBase);		
-		};
+app.factory('Todos', ['$resource', function ($resource) {
+	return $resource('/todo/api/:id', { id: '@id' }, {
+          'update': { method:'PUT' }
+      });	
+}]);		
 
-		todoFactory.insertTodo = function (todo) {
-			return $http.post(urlBase, todo);
-		};
-		
-		todoFactory.updateTodo = function (id, update) {
-			return $http.put(urlBase + '/' + id, update);
-		};
-		
-		todoFactory.deleteTodos = function () {
-			return $http.delete(urlBase);
-    	};	
-		
-		return todoFactory;
-}]);
-
-app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory', 
-    function TodoCtrl($scope, $filter, todoFactory) {
+app.controller('TodoCtrl', ['$scope', '$filter', 'Todos', 
+    function TodoCtrl($scope, $filter, Todos) {
         $scope.today = $filter('date')(new Date(), 'MM/dd/yyyy');
-	
-		getTodos();
-		
-		function getTodos() {
-			todoFactory.getTodos()
-            .success(function (data) {
-                $scope.todos = data;
-            })
-            .error(function (err) {
-                $scope.todos = [];
-				console.log ("Unable to get todos" + err);
-            });
-		};
-        
+			
+		$scope.todos = Todos.query();
+				
 		$scope.addTodo = function () {
             if($scope.newTodo) {
                 var newTodo = {
@@ -62,65 +34,56 @@ app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
                     'done': false,
 					'archived': false
                 };
-                todoFactory.insertTodo(newTodo).
-				success(function(data){
-                    $scope.todos = data;
-                    $scope.newTodo = '';
-                }).
-                error(function(err){
-                    console.log('Failed to add: ' + err);
-                });
+                Todos.save(newTodo, function (data) {
+					$scope.todos.push(data);
+					$scope.newTodo = '';
+				});
             }
         };
 
 		$scope.deleteAll = function () {
-            todoFactory.deleteTodos().
-            success(function(data){
-                $scope.todos = data;
-             }).
-            error(function(err){
-                console.log('Failed to delete all: ' + err);
-            });
+			Todos.delete({ 'archived' : true }, 
+				function (data) {
+					$scope.todos = Todos.query();
+				},
+				function (err) {
+					console.log('Failed to archive: ' + err);
+				});
         };	
 		
 		$scope.archive = function () {
-		    for(i in $scope.todos) {
-				if ($scope.todos[i].done === true){
-					todoFactory.updateTodo($scope.todos[i]._id,{ archived : true }).
-					success(function(data){
-						$scope.todos = data;
-					}).
-					error(function(err){
-						console.log('Failed to archive: ' + err);
-					});
-				}
-			}
+			Todos.update({ 'done' : true }, { 'archived' : true },
+			function (data) {
+				$scope.todos = Todos.query();
+			},
+			function (err) {
+			    console.log('Failed to archive: ' + err);
+			});
         };			
 		
 		$scope.done = function (todo) {
-			todoFactory.updateTodo(todo._id, { done : todo.done }).
-				success(function(data){
-					$scope.todos = data;
-				}).
-                error(function(err){
-                    console.log('Failed to complete: ' + err);
-				});
-        };	
+			Todos.update({ id : todo._id }, { done : todo.done },
+			function (data) {
+				//console.log('Mark done.');
+			},
+			function (err) {
+			    console.log('Failed to mark done: ' + err.title);
+			});
+        };
 				
 		$scope.editTitle = function (todo) {
 			$scope.originalTodo = angular.extend({}, todo);;
             todo.editing = true;			
         };
 		
-		$scope.updateTitle = function (todo) {
-			todoFactory.updateTodo(todo._id, { title : todo.title}).
-				success(function(data){
-					delete todo.editing;
-					$scope.todos = data;
-                }).
-                error(function(err){
-                    console.log('Failed to update the title: ' + err);
-            });
+		$scope.updateTitle = function (todo) {		
+			Todos.update({ id : todo._id }, { title : todo.title }, 
+			function (data) {
+				delete todo.editing;				
+			},
+			function (err) {
+			    console.log('Failed to update the title: ' + err);
+			});	
         };
 		
 		$scope.cancelTitle = function (todo) {		
