@@ -1,0 +1,24 @@
+{
+  "name": "todo",
+  "description": "A demo app illustrating the usage of express, mongoose in nodejs",
+  "keywords": [
+    "express",
+    "mongoose",
+  ],
+  "version": "0.0.0",
+  "author": "Viki Wong",  
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/Viki-W/Meteo.git"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+  "scripts": {
+    "start": "app.js"
+  },
+  "dependencies": {
+    "express": "latest",
+    "mogoose": "latest",
+  }
+}

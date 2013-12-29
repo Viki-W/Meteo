@@ -1,0 +1,9 @@
+<span><b>Date</b> {{today}}</span>
+[ <a href="/todo">today</a> ]
+[ <a href="" ng-click="deleteAll()">delete</a> ]
+<ul class="unstyled">
+    <li ng-repeat="todo in todos | filter:{archived: true}">
+        <label class="done-{{todo.done}}">{{todo.title}}</label>
+    </li>
+</ul>
+ 

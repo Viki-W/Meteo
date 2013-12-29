@@ -1,7 +1,21 @@
-﻿var app = angular.module('todo', []);
+﻿var app = angular.module('todo', ['ngRoute']);
 
-app.factory('todoFactory', ['$http', function ($http) {
-		
+app.config(function($routeProvider){
+	$routeProvider.
+    when('/', {
+      controller:'TodoCtrl',
+      templateUrl:'partials/today.html'
+    }).
+	when('/history', {
+      controller:'TodoCtrl',
+      templateUrl:'partials/history.html'
+    }).
+	otherwise({
+      redirectTo:'/'
+    });
+});
+
+app.factory('todoFactory', ['$http', function ($http) {		
 		var urlBase = '/todo/api';		
 		var todoFactory = {};
 		
@@ -16,15 +30,15 @@ app.factory('todoFactory', ['$http', function ($http) {
 		todoFactory.updateTodo = function (id, update) {
 			return $http.put(urlBase + '/' + id, update);
 		};
-	
+		
 		todoFactory.deleteTodos = function () {
 			return $http.delete(urlBase);
-		};
+    	};	
 		
 		return todoFactory;
 }]);
 
-app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
+app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory', 
     function TodoCtrl($scope, $filter, todoFactory) {
         $scope.today = $filter('date')(new Date(), 'MM/dd/yyyy');
 	
@@ -45,7 +59,8 @@ app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
             if($scope.newTodo) {
                 var newTodo = {
                     'title': $scope.newTodo,
-                    'done': false
+                    'done': false,
+					'archived': false
                 };
                 todoFactory.insertTodo(newTodo).
 				success(function(data){
@@ -58,15 +73,29 @@ app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
             }
         };
 
-		$scope.archive = function () {
+		$scope.deleteAll = function () {
             todoFactory.deleteTodos().
             success(function(data){
                 $scope.todos = data;
              }).
             error(function(err){
-                console.log('Failed to archive: ' + err);
+                console.log('Failed to delete all: ' + err);
             });
         };	
+		
+		$scope.archive = function () {
+		    for(i in $scope.todos) {
+				if ($scope.todos[i].done === true){
+					todoFactory.updateTodo($scope.todos[i]._id,{ archived : true }).
+					success(function(data){
+						$scope.todos = data;
+					}).
+					error(function(err){
+						console.log('Failed to archive: ' + err);
+					});
+				}
+			}
+        };			
 		
 		$scope.done = function (todo) {
 			todoFactory.updateTodo(todo._id, { done : todo.done }).
@@ -83,7 +112,7 @@ app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
             todo.editing = true;			
         };
 		
-		$scope.saveTitle = function (todo) {
+		$scope.updateTitle = function (todo) {
 			todoFactory.updateTodo(todo._id, { title : todo.title}).
 				success(function(data){
 					delete todo.editing;
@@ -94,11 +123,16 @@ app.controller('TodoCtrl', ['$scope', '$filter', 'todoFactory',
             });
         };
 		
-		$scope.cancel = function (todo) {		
+		$scope.cancelTitle = function (todo) {		
 			delete todo.editing;
 			$scope.todos[$scope.todos.indexOf(todo)] = $scope.originalTodo;
         };
+		
+		$scope.cancelNew = function () {		
+			$scope.newTodo = '';
+        };
 }]);
+
 
 app.directive('onEsc', function() {
   var ESCAPE_KEY = 27;
@@ -144,7 +178,7 @@ app.filter('notArchived', function() {
    return function(items, archived) {
     var filtered = [];
     angular.forEach(items, function(item) {
-      if(archived === undefined || archived === false){
+      if(item.archived === undefined || item.archived === false){
         filtered.push(item);
       }
     });
