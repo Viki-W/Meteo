@@ -44,17 +44,12 @@ app.get('/todo/api/:todo_id',function(req, res){
 });
 
 app.post('/todo/api',function(req, res){
-    Todo.create(req.body, function (err) {
+    Todo.create(req.body, function (err, todo) {
         if (err){
             res.send(err);
         }
-		Todo.find(function (err, todos) {
-			if (err) {
-				res.send(err);
-			}
-			res.send(todos);
-		});  
-		
+	
+		res.send(todo);	
     });
 });
 
@@ -67,33 +62,40 @@ app.put('/todo/api/:todo_id',function(req, res){
 					updateData[field] = req.body[field];
               }
            }  
-        }  
-    Todo.update(query, updateData, function (err) {
+    } 
+    Todo.update(query, updateData, function (err, numberAffected, raw) {
         if (err){
             res.send(err);
         }
-		Todo.find(function (err, todos) {
-			if (err) {
-				res.send(err);
-			}
-			res.send(todos);
-		});  
+		res.send(raw);	
     });
+});
 
+app.put('/todo/api',function(req, res){
+	var query = {};
+	for (var field in Todo.schema.paths) {
+           if ((field !== '_id') && (field !== '__v')) {
+              if (req.query[field] !== undefined) {
+					query[field] = req.query[field];
+              }
+           }  
+        } 
+	var options = { multi : true };
+    Todo.update(query, req.body, options ,function (err, numberAffected, raw) {
+        if (err){
+            res.send(err);
+        }
+		res.send(raw);	
+    });
 });
 
 app.delete('/todo/api',function(req, res){
 	var query = { done : true }; 
-    Todo.remove(query, function (err) {
+    Todo.remove(query, function (err, numberAffected, raw) {
         if (err){
             res.send(err);
         }
-		Todo.find(function (err, todos) {
-			if (err) {
-				res.send(err);
-			}
-			res.send(todos);
-		});  
+		res.send(raw);
     });
 });
 
