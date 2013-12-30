@@ -90,7 +90,14 @@ app.put('/todo/api',function(req, res){
 });
 
 app.delete('/todo/api',function(req, res){
-	var query = { done : true }; 
+	var query = {};
+	for (var field in Todo.schema.paths) {
+        if ((field !== '_id') && (field !== '__v')) {
+            if (req.query[field] !== undefined) {
+				query[field] = req.query[field];
+            }
+        }  
+    } 
     Todo.remove(query, function (err, numberAffected, raw) {
         if (err){
             res.send(err);
