@@ -3,7 +3,7 @@
   "description": "A demo app illustrating the usage of express, mongoose in nodejs",
   "keywords": [
     "express",
-    "mongoose",
+    "mongoose"
   ],
   "version": "0.0.0",
   "author": "Viki Wong",  
@@ -13,12 +13,12 @@
   },
   "engines": {
     "node": "0.10.x"
-  }
+  },
   "scripts": {
     "start": "app.js"
   },
   "dependencies": {
     "express": "latest",
-    "mogoose": "latest",
+    "mogoose": "latest"
   }
 }
