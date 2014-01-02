@@ -4,11 +4,11 @@
 <ul class="unstyled">
     <li ng-repeat="todo in todos | notArchived:archived">
         <input type="checkbox" ng-model="todo.done" ng-change="done(todo)">
-        <label class="done-{{todo.done}}" ng-hide="todo.editing" ng-dblclick="editTitle(todo)">{{todo.title}}</label>
+        <label class="done-{{todo.done}}" ng-hide="todo.editing" ng-dblclick="editTitle(todo)" title="{{todo.title}}">{{todo.title}}</label>
 		<input type="text" ng-model="todo.title" ng-show="todo.editing" on-enter="updateTitle(todo)" on-esc="cancelTitle(todo)" on-focus="todo.editing">
     </li>
 </ul>
 <form ng-submit="addTodo()">
-    <input type="text" ng-model="newTodo" size="30" placeholder="add new todo here" on-esc="cancelNew()">
+    <input type="text" ng-model="newTodo" placeholder="add new todo here" on-esc="cancelNew()">
     <input class="btn-primary" type="submit" value="add">
 </form>    
