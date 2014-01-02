@@ -23,8 +23,6 @@ app.factory('Todos', ['$resource', function ($resource) {
 
 app.controller('TodoCtrl', ['$scope', '$filter', 'Todos', 
     function TodoCtrl($scope, $filter, Todos) {
-        $scope.today = $filter('date')(new Date(), 'MM/dd/yyyy');
-			
 		$scope.todos = Todos.query();
 				
 		$scope.addTodo = function () {
@@ -136,6 +134,25 @@ app.directive('onFocus', function($timeout, $parse) {
 	}
   };
 });
+
+app.directive('today', function($interval, $filter) {
+    return function(scope, element, attrs) {
+      var format = 'MM/dd/yyyy', 
+      stopTime;
+	  
+	  updateTime();
+
+      function updateTime() {
+        element.text($filter('date')(new Date(), format));
+      }
+		
+      stopTime = $interval(updateTime, 60000);
+
+      element.bind('$destroy', function() {
+        $interval.cancel(stopTime);
+      });
+    }
+  });
 
 app.filter('notArchived', function() {
    return function(items, archived) {

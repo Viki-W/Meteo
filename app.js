@@ -1,4 +1,4 @@
-﻿var mongoose = require('mongoose')
+﻿var mongoose = require('mongoose'),
     express = require('express'),
     app = express(),
     port = process.env.PORT || 8080,
